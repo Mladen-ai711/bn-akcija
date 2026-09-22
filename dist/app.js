@@ -126,7 +126,7 @@
   }
   function demoNotice(){return state.demo?'<span class="example-label">Primjeri cijena — nisu stvarne akcije</span>':""}
   function homeView(){
-    return '<section class="banner" aria-label="Najbrže do dobrih cijena"><h1>Najbrže do<br>dobrih cijena</h1><div class="banner-art" aria-hidden="true"></div></section>'+
+    return '<section class="banner" aria-label="Najbrže do dobrih cijena"><div class="banner-copy"><span class="banner-eyebrow">BN AKCIJA <span aria-hidden="true">✦</span> AKCIJE SVAKI DAN</span><h1>Najbrže do<br>dobrih cijena<span class="banner-period">.</span></h1><p>Dnevne i sedmične akcije blizu vas</p></div><div class="banner-art" aria-hidden="true"></div></section>'+
       '<h2 class="page-heading">Šta tražite danas?</h2><p class="page-lede">Izaberite kategoriju</p>'+
       '<div class="category-grid">'+Object.keys(labels).map(categoryCard).join("")+'</div>'+
       '<p class="rule-note">3 dnevne · 10 sedmičnih ponuda po objektu</p>';
@@ -219,7 +219,3 @@
   else{sessionStorage.setItem("bn-intro-seen","1");setTimeout(dismiss,2400)}
   loadData();
 })();
-
-
-
-
