@@ -1,0 +1,83 @@
+:root{font-family:Arial,"Segoe UI",sans-serif;color:#103e35;background:#fff;font-size:16px;font-synthesis:none}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;min-width:320px}button,input{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible{outline:3px solid #008568;outline-offset:3px}.hidden{display:none!important}
+.app-shell{max-width:1120px;min-height:100dvh;margin:0 auto;background:#fff}.app-header{height:92px;display:flex;align-items:center;justify-content:space-between;padding:20px clamp(18px,4vw,50px);border-bottom:1px solid #edf0ee}.brand{display:inline-flex;align-items:center;gap:8px;color:#007d61;font-size:2rem;font-weight:800;letter-spacing:-.05em;text-decoration:none;line-height:1.1}.brand-button{border:0;background:transparent;padding:0}.brand-tag{display:inline-grid;place-items:center;background:#ffe34b;color:#103e35;clip-path:polygon(0 15%,75% 0,100% 50%,75% 100%,0 85%);width:70px;height:56px;transform:rotate(-8deg);letter-spacing:-.07em;padding-right:9px}.icon-button{width:48px;height:48px;border:1px solid #dae4df;background:#fff;border-radius:50%;display:grid;place-items:center;color:#103e35}
+.app-main{padding:26px clamp(18px,4vw,50px) 116px;min-height:calc(100dvh - 184px)}.banner{position:relative;background:#e6f8ee;border-radius:24px;min-height:180px;overflow:hidden;display:flex;align-items:center;padding:28px clamp(25px,5vw,45px);margin:0 0 32px}.banner::after{content:"";position:absolute;right:-44px;top:-52px;width:170px;height:145px;background:#ffe46c;border-radius:50%}.banner h1{position:relative;z-index:1;font-size:clamp(2rem,4vw,3.4rem);line-height:1.08;letter-spacing:-.05em;margin:0;max-width:65%}.banner-art{position:absolute;z-index:1;right:5%;bottom:0;width:180px;height:150px;background-image:url("./assets/banners.png");background-size:818px 616px;background-position:-555px -275px;background-repeat:no-repeat;background-color:#e6f8ee;background-blend-mode:multiply}
+.page-heading{font-size:clamp(2rem,4vw,3.3rem);line-height:1.1;letter-spacing:-.045em;margin:0 0 8px}.page-lede{font-size:1.15rem;color:#455d56;margin:0 0 25px}.category-grid{display:grid;gap:16px}.category-card{width:100%;min-height:148px;display:flex;align-items:center;gap:18px;text-align:left;border:1.5px solid #dbe5e0;border-radius:23px;background:#fff;padding:12px 24px 12px 14px;color:#103e35;transition:transform .15s,border-color .15s,box-shadow .15s}.category-card:hover{border-color:#138c72;box-shadow:0 12px 28px #0a5c3c10;transform:translateY(-2px)}.category-art{flex:0 0 148px;width:148px;height:122px;background-image:url("./assets/illustrations.png");background-size:607px 458px;background-repeat:no-repeat}.category-art.market{background-position:-100px -66px}.category-art.mesara{background-position:-267px -65px}.category-art.apoteka{background-position:-441px -66px}.category-copy{flex:1;min-width:0}.category-title{display:block;font-size:1.65rem;font-weight:800;letter-spacing:-.03em;margin-bottom:5px}.category-desc{display:block;color:#455d56;font-size:1rem;line-height:1.35}.chevron{font-size:2.1rem;font-weight:300;color:#007d61;margin-left:auto}.rule-note{margin:24px 0 0;text-align:center;color:#455d56;font-size:1rem}
+.bottom-nav{position:fixed;z-index:8;bottom:0;left:50%;transform:translateX(-50%);width:min(100%,1120px);height:82px;padding-bottom:env(safe-area-inset-bottom);display:grid;grid-template-columns:repeat(3,1fr);background:#fff;border-top:1px solid #dfe8e3}.nav-item{border:0;background:#fff;color:#445d55;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;font-size:.88rem;font-weight:600}.nav-item.active{color:#007d61}.nav-item svg{width:25px;height:25px;stroke-width:1.9}
+.breadcrumb{display:flex;align-items:center;gap:8px;color:#5d706a;font-size:.94rem;margin:0 0 17px}.breadcrumb button{border:0;background:none;padding:4px 0;color:#007d61;font-weight:700}.section-header{margin:0 0 20px}.section-header h1{font-size:clamp(2rem,4vw,3rem);margin:0 0 6px;letter-spacing:-.045em}.section-header p{margin:0;color:#52665f;font-size:1rem}.search-wrap{position:relative;margin:0 0 24px}.search-wrap svg{position:absolute;left:16px;top:16px;width:24px;height:24px;pointer-events:none}.search{width:100%;height:58px;border:1.5px solid #dce5e1;background:#f8faf9;border-radius:16px;padding:0 18px 0 50px;color:#103e35;font-size:1rem}.search::placeholder{color:#60766f}
+.store-grid{display:grid;gap:14px}.store-card{width:100%;min-height:106px;display:flex;align-items:center;gap:18px;border:1.5px solid #dfe8e3;border-radius:20px;background:#fff;text-align:left;padding:18px;color:#103e35}.store-card:hover{border-color:#007d61}.store-number{width:60px;height:60px;flex:0 0 60px;border-radius:18px;background:#e9f7f0;display:grid;place-items:center;color:#007d61;font-size:1.7rem;font-weight:800}.store-card.mesara .store-number{background:#fff0eb;color:#b44d31}.store-card.apoteka .store-number{background:#e9f6f6;color:#087c84}.store-name{font-size:1.25rem;font-weight:800}.store-sub{display:block;color:#52665f;font-size:.95rem;margin-top:5px}.store-card .chevron{font-size:1.7rem}
+.segment{display:grid;grid-template-columns:1fr 1fr;gap:5px;background:#f1f5f3;padding:5px;border-radius:15px;margin:18px 0 22px}.segment button{height:52px;border:0;border-radius:11px;background:transparent;color:#103e35;font-weight:800}.segment button.active{background:#007d61;color:#fff;box-shadow:0 4px 12px #007d6124}.offer-count{font-size:1rem;color:#4e625a;margin:0 0 14px}.offer-list{display:grid;gap:12px}.offer-card{display:grid;grid-template-columns:82px minmax(0,1fr) 44px;gap:14px;align-items:center;min-height:116px;background:#fff;border:1.5px solid #dfe8e3;border-radius:18px;padding:13px}.offer-visual{width:82px;height:82px;border-radius:14px;background:#f5f8f6;display:grid;place-items:center;font-size:2.5rem}.offer-name{font-size:1.1rem;font-weight:800;margin:0 0 5px;line-height:1.2}.offer-unit{font-size:.96rem;color:#52665f}.offer-price{font-size:1.48rem;font-weight:800;color:#103e35;margin:5px 0 0}.offer-old{font-size:.93rem;color:#61736c;text-decoration:line-through;margin-left:8px}.offer-valid{font-size:.9rem;color:#455d56;margin:7px 0 0}.save-button{width:44px;height:44px;display:grid;place-items:center;border:1.5px solid #dce5e1;border-radius:12px;background:white;color:#007d61}.save-button.saved{background:#e5f7ed;border-color:#007d61}.save-button svg{width:22px;height:22px}.empty-state{border:1.5px dashed #cbdad2;border-radius:20px;padding:36px 24px;text-align:center;color:#52665f}.empty-state h2{color:#103e35;margin:0 0 7px}.empty-state p{margin:0}
+.example-label{display:inline-block;margin:0 0 14px;padding:7px 12px;border-radius:100px;background:#fff5cc;color:#5e4b00;font-size:.88rem;font-weight:700}.status{font-size:.94rem;color:#52665f;margin:8px 0}.status.error{color:#ae392b}.manage-link{font-size:.9rem;color:#007d61;text-decoration:underline;background:none;border:0;padding:7px 0;margin-top:20px}
+.splash{position:fixed;z-index:50;inset:0;background:#ffe044;display:grid;place-items:center;overflow:hidden}.splash.exit{opacity:0;pointer-events:none;transition:opacity .35s ease}.splash-wave{position:absolute;width:120%;height:25%;left:-10%;border-radius:50%}.splash-wave-top{top:-12%;background:#ffed83;transform:rotate(-13deg)}.splash-wave-bottom{bottom:-14%;height:28%;background:#00a478;transform:rotate(-9deg)}.splash-content{text-align:center;z-index:1;animation:pop .55s ease-out both}.brand-large{font-size:clamp(3rem,10vw,5rem);justify-content:center}.brand-large .brand-tag{width:122px;height:104px;padding-right:12px}.splash-content p{font-size:clamp(2rem,7vw,3.4rem);line-height:1.12;letter-spacing:-.04em;font-weight:800;margin:42px 0 0;animation:rise .5s .3s both}.skip-splash{position:absolute;bottom:48px;z-index:2;border:1px solid #103e35;color:#103e35;border-radius:100px;background:#fff8c2;padding:11px 20px;font-weight:700}
+@keyframes pop{from{opacity:0;transform:translateY(15px) scale(.93)}to{opacity:1;transform:none}}@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@media(max-width:620px){.app-header{height:66px}.brand{font-size:1.8rem}.brand-tag{width:58px;height:49px}.app-main{padding-top:16px}.banner{min-height:116px;padding:17px 22px;margin-bottom:20px}.banner h1{font-size:clamp(1.8rem,7vw,2.4rem);max-width:62%}.banner-art{transform:scale(.8);transform-origin:bottom right;right:0}.page-heading{font-size:1.9rem}.category-card{min-height:112px;padding:8px 15px 8px 8px;gap:6px}.category-art{flex-basis:122px;width:122px;height:96px;transform:scale(.86);transform-origin:center left}.category-title{font-size:1.48rem}.category-desc{font-size:.92rem}.chevron{font-size:1.7rem}.bottom-nav{height:78px}.offer-card{grid-template-columns:68px minmax(0,1fr) 42px;gap:10px;padding:10px}.offer-visual{width:68px;height:68px;font-size:2rem}.offer-price{font-size:1.3rem}}
+@media(max-width:370px){.category-art{flex-basis:95px;transform:scale(.73)}.category-title{font-size:1.3rem}.category-desc{font-size:.86rem}.banner-art{transform:scale(.66)}}
+@media(min-width:760px){.category-grid{grid-template-columns:repeat(3,1fr)}.category-card{min-height:260px;align-items:flex-start;flex-direction:column;position:relative;padding:22px}.category-art{height:130px}.category-copy{flex:0}.category-card .chevron{position:absolute;right:22px;bottom:22px}.store-grid{grid-template-columns:repeat(3,1fr)}.offer-list{grid-template-columns:repeat(2,1fr)}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+
+
+
+
+/* Desktop layout: keep the sprite to its first illustration row and move navigation into the header. */
+@media (min-width: 760px) {
+  .app-shell { position: relative; }
+  .app-main { padding-bottom: 48px; min-height: calc(100dvh - 92px); }
+  .category-art { height: 106px; flex-basis: 106px; }
+  .category-card { min-height: 245px; }
+  .bottom-nav { position: absolute; top: 14px; right: clamp(18px, 4vw, 50px); bottom: auto; left: auto; transform: none; width: auto; height: 64px; padding: 0; display: flex; align-items: center; gap: 6px; border: 0; background: transparent; }
+  .nav-item { flex-direction: row; gap: 8px; padding: 0 14px; border-radius: 12px; background: transparent; font-size: 1rem; }
+  .nav-item:hover, .nav-item.active { background: #e9f7f0; }
+  #header-back { display: none !important; }
+}
+.banner-art { -webkit-mask-image: radial-gradient(ellipse at center, #000 53%, transparent 83%); mask-image: radial-gradient(ellipse at center, #000 53%, transparent 83%); }
+/* Give the bag room inside its source image and feather the source backdrop away. */
+.banner-art {
+  width: 230px;
+  height: 180px;
+  right: 2%;
+  background-position: -530px -255px;
+  -webkit-mask-image: radial-gradient(ellipse 115px 100px at 50% 50%, #000 68%, transparent 100%);
+  mask-image: radial-gradient(ellipse 115px 100px at 50% 50%, #000 68%, transparent 100%);
+}
+@media (max-width: 620px) {
+  .banner-art { right: -14px; }
+}
+/* Isolated transparent artwork replaces the concept-board crop. */
+.banner-art {
+  width: 210px;
+  height: 160px;
+  right: 4%;
+  background-image: url("./assets/banner-bag-transparent.png");
+  background-size: contain;
+  background-position: center bottom;
+  background-repeat: no-repeat;
+  background-color: transparent;
+  background-blend-mode: normal;
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+@media (max-width: 620px) {
+  .banner-art { right: -8px; }
+}
+/* Saved offers show their source and have an explicit removal action. */
+.saved-offer-list { grid-template-columns: 1fr; max-width: 850px; }
+.saved-offer-card { grid-template-columns: 82px minmax(0,1fr) auto; gap: 16px; align-items: start; }
+.saved-offer-card .offer-visual { margin-top: 4px; }
+.offer-source { display: flex; flex-wrap: wrap; align-items: center; gap: 5px 12px; margin: 0 0 9px; color: #006e56; font-size: .98rem; line-height: 1.3; }
+.offer-source strong { font-weight: 800; }
+.offer-source span { padding: 3px 8px; border-radius: 100px; background: #e9f7f0; color: #225e4d; font-size: .85rem; font-weight: 700; }
+.saved-offer-card .remove-button { display: inline-flex; width: auto; min-width: 96px; height: 42px; padding: 0 11px; gap: 5px; align-items: center; justify-content: center; background: #fff4f1; border-color: #efc8c0; color: #a03a2e; font-weight: 800; }
+.saved-offer-card .remove-button:hover { background: #ffe7e1; border-color: #c65445; }
+.saved-offer-card .remove-button svg { width: 18px; height: 18px; }
+@media (max-width: 620px) {
+  .saved-offer-card { grid-template-columns: 68px minmax(0,1fr); gap: 10px; }
+  .saved-offer-card .remove-button { grid-column: 2; justify-self: start; margin-top: 1px; }
+}
+/* Totals for saved offers. */
+.saved-summary { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; max-width: 850px; margin: 4px 0 14px; }
+.summary-card { min-width: 0; padding: 18px 20px; border: 1.5px solid #cfe5d9; border-radius: 18px; background: #eaf8f0; }
+.summary-card.savings { border-color: #f0e0a2; background: #fff7d8; }
+.summary-card span { display: block; color: #355b4d; font-size: 1rem; font-weight: 700; line-height: 1.3; }
+.summary-card strong { display: block; margin-top: 8px; color: #103e35; font-size: clamp(1.4rem,3.5vw,2rem); line-height: 1.1; overflow-wrap: anywhere; }
+.savings-note { max-width: 850px; margin: 0 0 15px; color: #52665f; font-size: .95rem; line-height: 1.4; }
+@media (max-width: 370px) { .saved-summary { grid-template-columns: 1fr; } }

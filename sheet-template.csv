@@ -1,0 +1,6 @@
+category,store,period,product,unit,price,old_price,valid_until
+market,Market 1,daily,"Mlijeko 2,8%",1 l,"1,65","2,20",22.09.
+market,Market 1,weekly,Suncokretovo ulje,1 l,"2,45","3,10",21.09.-27.09.
+mesara,Mesara 1,daily,Pileći file,1 kg,"9,90","12,90",22.09.
+apoteka,Apoteka 1,daily,Krema za ruke,75 ml,"3,90","5,20",22.09.
+
