@@ -1,6 +1,6 @@
 # BN akcija
 
-Prva lokalna web verzija aplikacije. Otvara se na telefonu i računaru kroz preglednik.
+Web verzija aplikacije. Otvara se na telefonu i računaru kroz preglednik. Javna probna verzija: https://mladen-ai711.github.io/bn-akcija/.
 
 ## Šta radi
 
@@ -23,7 +23,7 @@ python -m http.server 8765 --directory dist
 
 Zatim otvorite `http://127.0.0.1:8765/`.
 
-Za pristup s telefona u istoj mreži kasnije ćemo podesiti lokalnu mrežnu adresu ili objaviti web verziju. Ova verzija još nije javno objavljena.
+Za pristup s telefona otvorite javni link. Lokalna adresa 127.0.0.1 radi samo na računaru na kojem je pokrenut server.
 
 ## Google Sheet
 
@@ -54,6 +54,7 @@ Aplikacija je bez dodatnih biblioteka i može se prenijeti na standardni statič
 
 ## Objava preko GitHub Pages
 
-Repozitorij sadrži automatsku objavu datoteka iz `dist` na GitHub Pages nakon slanja promjena na granu `main`. U postavkama repozitorija, pod **Pages → Build and deployment**, izaberite **GitHub Actions** kao izvor. Javni link će imati oblik `https://KORISNIK.github.io/bn-akcija/`.
+Repozitorij sadrži automatsku objavu datoteka iz `dist` na GitHub Pages nakon slanja promjena na granu `main`. U postavkama repozitorija, pod **Pages → Build and deployment**, izaberite **GitHub Actions** kao izvor. Javni link: `https://mladen-ai711.github.io/bn-akcija/`.
 
 Dok je `sheetCsvUrl` prazan, javna stranica prikazuje isključivo jasno označene primjerne cijene. Prije korištenja sa stvarnim akcijama povežite i provjerite stvarne podatke. Svaki CSV objavljen kroz `dist` biće javno dostupan.
+
