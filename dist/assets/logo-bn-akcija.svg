@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 228 72" role="img" aria-label="BN akcija">
+  <g transform="rotate(-7 40 36)">
+    <path d="M8 12 57 9c2-.1 4 1 5 3l15 20c1.5 2 1.5 4 0 6L62 59c-1 2-3 3-5 3L8 59c-2 0-3-2-3-4V16c0-2 1-4 3-4Z" fill="#ffe34b"/>
+    <circle cx="68" cy="35" r="3.4" fill="#fff"/>
+    <text x="12" y="49" fill="#103e35" font-family="Arial, 'Segoe UI', sans-serif" font-size="41" font-weight="900" letter-spacing="-2.4">BN</text>
+  </g>
+  <text x="83" y="52" fill="#007d61" font-family="Arial, 'Segoe UI', sans-serif" font-size="45" font-weight="900" letter-spacing="-2.8">akcija</text>
+</svg>

@@ -1,5 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-<rect width="64" height="64" rx="16" fill="#ffe34b"/>
-<path d="M13 16h34l9 16-9 16H13a5 5 0 0 1-5-5V21a5 5 0 0 1 5-5Z" fill="#fff" transform="rotate(-8 32 32)"/>
-<text x="10" y="42" font-family="Arial,sans-serif" font-size="29" font-weight="800" fill="#063f34">BN</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="BN akcija">
+  <rect width="64" height="64" rx="15" fill="#fff"/>
+  <g transform="rotate(-7 32 32)">
+    <path d="M7 12 44 9c2 0 3 1 4 2l12 18c1 2 1 4 0 6L48 53c-1 2-2 3-4 3L7 53c-2 0-3-2-3-4V16c0-2 1-4 3-4Z" fill="#ffe34b"/>
+    <circle cx="53" cy="32" r="2.8" fill="#fff"/>
+    <text x="9" y="43" fill="#103e35" font-family="Arial, 'Segoe UI', sans-serif" font-size="31" font-weight="900" letter-spacing="-2">BN</text>
+  </g>
 </svg>
