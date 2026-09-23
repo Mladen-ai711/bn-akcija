@@ -29,12 +29,13 @@ Za pristup s telefona otvorite javni link. Lokalna adresa 127.0.0.1 radi samo na
 
 U `dist/config.js` nalazi se polje `sheetCsvUrl`. Kada Google Sheet bude spreman, izvezite ga kao CSV, sačuvajte u `dist/offers.csv` i upišite `./offers.csv` u to polje. Tako svi podaci ostaju među fajlovima aplikacije. Može se koristiti i direktan javni CSV URL ako izvor dopušta učitavanje iz preglednika. Kolone su navedene u `sheet-template.csv`.
 
-Obavezne kolone: `category, store, period, product, unit, price, valid_until`. Opcionalna kolona: `old_price`.
+Obavezne kolone: `category, store, period, product, unit, price, valid_until`. Opcionalne kolone: `old_price`, `image`.
 
 - `category`: `market`, `mesara` ili `apoteka`
 - `period`: `daily` ili `weekly`
 - `price` i `old_price`: npr. `1,65` ili `1.65`
 - `valid_until`: tekst datuma koji će biti prikazan korisnicima, npr. `23.09.`, `21.09.-27.09.` ili `30.09.2026`. Posljednji datum u tekstu je zadnji dan akcije: poslije njega ponuda se više ne prikazuje. Ako datum ne može da se pročita, ponuda ostaje vidljiva.
+- `image`: direktan link ka fotografiji proizvoda (mora se završavati na sliku, npr. `.jpg`/`.png`, ne link ka stranici). Ako je prazna, a naziv proizvoda se poklapa sa jednim od već pripremljenih (Mlijeko 2,8%, Jaja, Pileći file...), prikazuje se ta gotova sličica; inače se prikazuje opšta ikonica kategorije. Ako link ne uspije da se učita, aplikacija se sama vrati na ikonicu.
 
 Red sa greškom (npr. bez cijene) se preskače, a aplikacija navede broj tog reda u poruci. Tabela se sama osvježava na svakih `refreshMinutes` minuta iz `config.js`.
 

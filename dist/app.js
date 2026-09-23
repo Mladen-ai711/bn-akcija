@@ -49,7 +49,7 @@
     }catch{return []}
   };
   const writeSaved = () => storageSet("localStorage","bn-saved",JSON.stringify([...state.saved]));
-  const snapshot = (o,qty=1) => ({category:o.category,store:o.store,period:o.period,product:o.product,unit:o.unit,price:o.price,oldPrice:o.oldPrice,valid:o.valid,emoji:o.emoji,qty});
+  const snapshot = (o,qty=1) => ({category:o.category,store:o.store,period:o.period,product:o.product,unit:o.unit,price:o.price,oldPrice:o.oldPrice,valid:o.valid,image:o.image||null,emoji:o.emoji,qty});
   const state = {view:"home",category:null,store:null,period:"daily",stores:[],offers:[],demo:true,error:"",warning:"",saved:new Map(readSaved()),qty:new Map()};
   // Količina: dok ponuda nije sačuvana pamti se privremeno (qty mapa); nakon čuvanja živi u sačuvanoj kopiji, da bi ostala i poslije osvježavanja.
   const MAX_QTY=99;
@@ -147,7 +147,8 @@
       if(!stores.has(sid))stores.set(sid,{id:sid,category,name:store});
       const count=offers.filter(o=>o.category===category&&o.store===store&&o.period===period).length;
       if(count >= (period==="daily"?3:10))continue;
-      offers.push({category,store,period,product,unit,price:current,oldPrice:Number.isFinite(oldPrice)&&oldPrice>current?oldPrice:null,valid:get("valid_until"),emoji:({market:"🛒",mesara:"🥩",apoteka:"🧴"})[category]});
+      // Kolona "image" (opciono): direktan link ka fotografiji iz tabele. Ako je nema, koristi se poznata sličica po nazivu proizvoda, pa tek onda emoji kategorije.
+      offers.push({category,store,period,product,unit,price:current,oldPrice:Number.isFinite(oldPrice)&&oldPrice>current?oldPrice:null,valid:get("valid_until"),image:get("image")||null,emoji:({market:"🛒",mesara:"🥩",apoteka:"🧴"})[category]});
     }
     if(!offers.length)throw Error("Tabela nema valjanih ponuda.");
     const warning=badRows.length?"Preskočeni neispravni redovi u tabeli: "+badRows.slice(0,10).join(", ")+(badRows.length>10?" i još "+(badRows.length-10):"")+".":"";
@@ -231,8 +232,11 @@
     const source=inSaved?'<p class="offer-source">'+(stale?'<strong>'+labels[o.category]+' · '+escapeHtml(o.store)+'</strong>':'')+'<span>'+(o.period==="daily"?"Danas":"Ove sedmice")+'</span></p>':"";
     const action=inSaved?svg("trash"):svg("bookmark",saved?"currentColor":"none");
     const validLine=stale?'<p class="offer-valid stale-note">Više nije u ponudi</p>':'<p class="offer-valid">Važi '+escapeHtml(o.valid||"prema objavi")+'</p>';
-    const image=productImages[o.product];
-    const visual=image?'<img src="./assets/products/'+image+'" alt="">':o.emoji;
+    const knownImage=productImages[o.product];
+    // Redoslijed slike: link iz tabele (kolona "image"), pa poznata sličica po nazivu proizvoda, pa emoji kategorije. Ako link iz tabele ne uspije da se učita, sam se vrati na emoji.
+    const visual=o.image?'<img src="'+escapeHtml(o.image)+'" alt="" data-fallback="'+escapeHtml(o.emoji||"🛒")+'">'
+      :knownImage?'<img src="./assets/products/'+knownImage+'" alt="">'
+      :(o.emoji||"🛒");
     const qty=getQty(key);
     const qtyRow='<div class="qty-row"><span class="qty-label">Količina</span><div class="qty-stepper"><button type="button" class="qty-btn" data-qty="'+escapeHtml(key)+'" data-dir="-1" aria-label="Smanji količinu">−</button><span class="qty-value" aria-live="polite">'+qty+'</span><button type="button" class="qty-btn" data-qty="'+escapeHtml(key)+'" data-dir="1" aria-label="Povećaj količinu">+</button></div></div>';
     const totalLine=qty>1?'<p class="offer-total">Ukupno: '+price(o.price*qty)+'</p>':"";
@@ -319,6 +323,12 @@
       render();
     }
   });
+  // Slika iz tabele koja se ne učita (loš link) se sama zamijeni emojijem kategorije; "error" na <img> se ne penje, pa mora capture faza.
+  document.addEventListener("error",event=>{
+    const img=event.target;
+    if(!(img instanceof HTMLImageElement)||!img.dataset.fallback)return;
+    img.replaceWith(document.createTextNode(img.dataset.fallback));
+  },true);
   document.addEventListener("input",event=>{
     if(!event.target.matches(".search"))return;
     const term=fold(event.target.value);
