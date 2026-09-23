@@ -7,15 +7,31 @@
     search:'<circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/>',
     back:'<path d="m15 18-6-6 6-6"/>',
     check:'<path d="m5 12 5 5L20 7"/>',
-    x:'<path d="M18 6 6 18M6 6l12 12"/>'
+    x:'<path d="M18 6 6 18M6 6l12 12"/>',
+    trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13M9 7V4h6v3"/>'
   };
   const svg = (name, fill="none") => '<svg viewBox="0 0 24 24" fill="'+fill+'" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+icons[name]+'</svg>';
   const labels = {market:"Marketi",mesara:"Mesare",apoteka:"Apoteke"};
   const singular = {market:"Market",mesara:"Mesara",apoteka:"Apoteka"};
   const descriptions = {market:"Namirnice i kućne potrepštine",mesara:"Meso i mesne prerađevine",apoteka:"Njega i apotekarski proizvodi"};
   const main = document.getElementById("app-main");
-  const state = {view:"home",category:null,store:null,period:"daily",stores:[],offers:[],demo:true,error:"",saved:new Set(JSON.parse(localStorage.getItem("bn-saved") || "[]"))};
+  const storageGet = (store,key) => {try{return window[store].getItem(key)}catch{return null}};
+  const storageSet = (store,key,value) => {try{window[store].setItem(key,value)}catch{}};
+  // Saved offers are stored as [id, copy of the offer] so they stay visible after the offer leaves the table.
+  // Older versions stored only ids; those get their copy once the offer is seen again.
+  const readSaved = () => {
+    try{
+      const list=JSON.parse(storageGet("localStorage","bn-saved")||"[]");
+      if(!Array.isArray(list))return [];
+      return list.map(item=>typeof item==="string"?[item,null]:item).filter(item=>Array.isArray(item)&&typeof item[0]==="string");
+    }catch{return []}
+  };
+  const writeSaved = () => storageSet("localStorage","bn-saved",JSON.stringify([...state.saved]));
+  const snapshot = o => ({category:o.category,store:o.store,period:o.period,product:o.product,unit:o.unit,price:o.price,oldPrice:o.oldPrice,valid:o.valid,emoji:o.emoji});
+  const state = {view:"home",category:null,store:null,period:"daily",stores:[],offers:[],demo:true,error:"",warning:"",saved:new Map(readSaved())};
   const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+  // Search ignores case and diacritics, so "secer" finds "Šećer" and "dj" finds "đ".
+  const fold = value => String(value ?? "").toLowerCase().replace(/đ/g,"dj").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/\s+/g," ").trim();
   const price = value => Number(value).toFixed(2).replace(".",",") + " KM";
   const idOf = (category,store) => category+"::"+store;
   const offerId = o => [o.category,o.store,o.period,o.product,o.unit].join("::");
@@ -27,7 +43,7 @@
   const demoProducts = {
     market:{
       daily:[["Mlijeko 2,8%","1 l",1.65,2.20,"🥛"],["Jaja","10 kom",3.60,4.50,"🥚"],["Jabuke","1 kg",1.50,2.00,"🍎"]],
-      weekly:[["Suncokretovo ulje","1 l",2.45,3.10,"🫒"],["Brašno","1 kg",1.10,1.45,"🌾"],["Kafa","200 g",3.95,5.20,"☕"],["Deterdžent","3 kg",8.90,11.20,"🧴"],["Šećer","1 kg",1.45,1.90,"🍬"],["Jogurt","1 l",1.95,2.40,"🥛"],["Riža","1 kg",2.20,2.85,"🍚"],["Banane","1 kg",2.10,2.70,"🍌"],["Hljeb","500 g",1.25,1.60,"🍞"],["Pasta","500 g",1.60,2.10,"🍝"]]
+      weekly:[["Suncokretovo ulje","1 l",2.45,3.10,"🌻"],["Brašno","1 kg",1.10,1.45,"🌾"],["Kafa","200 g",3.95,5.20,"☕"],["Deterdžent","3 kg",8.90,11.20,"🧴"],["Šećer","1 kg",1.45,1.90,"🍬"],["Jogurt","1 l",1.95,2.40,"🥛"],["Riža","1 kg",2.20,2.85,"🍚"],["Banane","1 kg",2.10,2.70,"🍌"],["Hljeb","500 g",1.25,1.60,"🍞"],["Pasta","500 g",1.60,2.10,"🍝"]]
     },
     mesara:{
       daily:[["Pileći file","1 kg",9.90,12.90,"🍗"],["Juneće mljeveno meso","1 kg",13.50,16.80,"🥩"],["Pileći batak","1 kg",5.80,7.20,"🍗"]],
@@ -35,7 +51,7 @@
     },
     apoteka:{
       daily:[["Krema za ruke","75 ml",3.90,5.20,"🧴"],["Balzam za usne","4 g",2.80,3.60,"💄"],["Šampon","250 ml",5.40,6.90,"🧴"]],
-      weekly:[["Krema za ruke","75 ml",3.90,5.20,"🧴"],["Šampon","250 ml",5.40,6.90,"🧴"],["Gel za tuširanje","400 ml",4.40,5.80,"🧴"],["Pasta za zube","75 ml",2.70,3.50,"🪥"],["Četkica za zube","1 kom",2.10,2.90,"🪥"],["Balzam za usne","4 g",2.80,3.60,"💄"],["Losion za tijelo","250 ml",6.90,8.50,"🧴"],["Krema za lice","50 ml",8.90,11.20,"🧴"],["Sapun","100 g",1.20,1.70,"🧼"],["Vlažne maramice","72 kom",3.30,4.20,"🧻"]]
+      weekly:[["Krema za ruke","75 ml",3.90,5.20,"🧴"],["Šampon","250 ml",5.40,6.90,"🧴"],["Gel za tuširanje","400 ml",4.40,5.80,"🧴"],["Pasta za zube","75 ml",2.70,3.50,"🦷"],["Četkica za zube","1 kom",2.10,2.90,"🦷"],["Balzam za usne","4 g",2.80,3.60,"💄"],["Losion za tijelo","250 ml",6.90,8.50,"🧴"],["Krema za lice","50 ml",8.90,11.20,"🧴"],["Sapun","100 g",1.20,1.70,"🧼"],["Vlažne maramice","72 kom",3.30,4.20,"🧻"]]
     }
   };
   function demoData(){
@@ -88,14 +104,14 @@
     for(const required of ["category","store","period","product","unit","price","valid_until"]){
       if(!headers.includes(required))throw Error("Nedostaje kolona: "+required);
     }
-    const stores=new Map(), offers=[];
+    const stores=new Map(), offers=[], badRows=[];
     for(const [index,row] of rows.entries()){
       if(row.every(v=>!v.trim()))continue;
       const get=name=>row[headers.indexOf(name)]?.trim()||"";
       const category=normalizeCategory(get("category")),period=normalizePeriod(get("period"));
       const store=get("store"),product=get("product"),unit=get("unit");
       const current=numberValue(get("price")),oldPrice=numberValue(get("old_price"));
-      if(!category||!period||!store||!product||!unit||!Number.isFinite(current)||current<=0)throw Error("Neispravan podatak u redu "+(index+2)+".");
+      if(!category||!period||!store||!product||!unit||!Number.isFinite(current)||current<=0){badRows.push(index+2);continue}
       const sid=idOf(category,store);
       if(!stores.has(sid))stores.set(sid,{id:sid,category,name:store});
       const count=offers.filter(o=>o.category===category&&o.store===store&&o.period===period).length;
@@ -103,21 +119,38 @@
       offers.push({category,store,period,product,unit,price:current,oldPrice:Number.isFinite(oldPrice)&&oldPrice>current?oldPrice:null,valid:get("valid_until"),emoji:({market:"🛒",mesara:"🥩",apoteka:"🧴"})[category]});
     }
     if(!offers.length)throw Error("Tabela nema valjanih ponuda.");
-    return {stores:[...stores.values()],offers};
+    const warning=badRows.length?"Preskočeni neispravni redovi u tabeli: "+badRows.slice(0,10).join(", ")+(badRows.length>10?" i još "+(badRows.length-10):"")+".":"";
+    return {stores:[...stores.values()],offers,warning};
   }
+  const sheetUrl=window.BN_CONFIG?.sheetCsvUrl?.trim();
+  let lastSnapshot="";
   async function loadData(){
-    const url=window.BN_CONFIG?.sheetCsvUrl?.trim();
-    if(!url){const data=demoData();Object.assign(state,data,{demo:true});render();return}
-    try{
-      const response=await fetch(url,{cache:"no-store"});
+    if(!sheetUrl)Object.assign(state,demoData(),{demo:true});
+    else try{
+      const response=await fetch(sheetUrl,{cache:"no-store"});
       if(!response.ok)throw Error("Tabela nije dostupna ("+response.status+").");
       Object.assign(state,dataFromCSV(await response.text()),{demo:false,error:""});
     }catch(error){
-      const data=demoData();Object.assign(state,data,{demo:true,error:"Google Sheet nije učitan: "+error.message});
+      // A failed refresh keeps the last real offers; examples appear only if nothing real was ever loaded.
+      if(state.demo)Object.assign(state,demoData(),{error:"Google Sheet nije učitan: "+error.message});
+      else state.error="Osvježavanje nije uspjelo, prikazane su posljednje učitane ponude.";
     }
+    let savedChanged=false;
+    for(const o of state.offers){
+      const id=offerId(o);
+      if(state.saved.has(id)&&JSON.stringify(state.saved.get(id))!==JSON.stringify(snapshot(o))){state.saved.set(id,snapshot(o));savedChanged=true}
+    }
+    if(savedChanged)writeSaved();
+    const current=JSON.stringify([state.offers,state.error,state.warning]);
+    if(current===lastSnapshot)return;
+    lastSnapshot=current;
+    const term=document.querySelector(".search")?.value||"";
     render();
+    const search=document.querySelector(".search");
+    if(term&&search){search.value=term;search.dispatchEvent(new Event("input",{bubbles:true}))}
   }
-  function navigate(view,category=null,store=null){
+  function navigate(view,category=null,store=null,fromHistory=false){
+    if(!fromHistory)history.pushState({view,category,store,depth:(history.state?.depth||0)+1},"");
     state.view=view;state.category=category;state.store=store;state.period="daily";
     render();window.scrollTo({top:0,behavior:"instant"});main.focus({preventScroll:true});
   }
@@ -125,8 +158,11 @@
     return '<button class="category-card" type="button" data-category="'+category+'"><span class="category-art '+category+'" aria-hidden="true"></span><span class="category-copy"><span class="category-title">'+labels[category]+'</span><span class="category-desc">'+descriptions[category]+'</span></span><span class="chevron" aria-hidden="true">›</span></button>';
   }
   function demoNotice(){return state.demo?'<span class="example-label">Primjeri cijena — nisu stvarne akcije</span>':""}
+  function statusNotice(){
+    return [state.error,state.warning].filter(Boolean).map(text=>'<p class="status error" role="status">'+escapeHtml(text)+'</p>').join("");
+  }
   function homeView(){
-    return '<section class="banner" aria-label="Najbrže do dobrih cijena"><div class="banner-copy"><span class="banner-eyebrow">BN AKCIJA <span aria-hidden="true">✦</span> AKCIJE SVAKI DAN</span><h1>Najbrže do<br>dobrih cijena<span class="banner-period">.</span></h1><p>Dnevne i sedmične akcije blizu vas</p></div><div class="banner-art" aria-hidden="true"></div></section>'+
+    return statusNotice()+'<section class="banner" aria-label="Najbrže do dobrih cijena"><div class="banner-copy"><span class="banner-eyebrow">BN AKCIJA <span aria-hidden="true">✦</span> AKCIJE SVAKI DAN</span><h1>Najbrže do<br>dobrih cijena<span class="banner-period">.</span></h1><p>Dnevne i sedmične akcije blizu vas</p></div><div class="banner-art" aria-hidden="true"></div></section>'+
       '<h2 class="page-heading">Šta tražite danas?</h2><p class="page-lede">Izaberite kategoriju</p>'+
       '<div class="category-grid">'+Object.keys(labels).map(categoryCard).join("")+'</div>'+
       '<p class="rule-note">3 dnevne · 10 sedmičnih ponuda po objektu</p>';
@@ -136,22 +172,40 @@
   }
   function storesView(category){
     const stores=state.stores.filter(s=>s.category===category);
-    return breadcrumb(category)+'<div class="section-header"><h1>'+labels[category]+'</h1><p>Izaberite objekat i pogledajte ponude.</p></div>'+
+    return breadcrumb(category)+'<div class="section-header category-head"><div class="category-head-copy"><h1>'+labels[category]+'</h1><p>Izaberite objekat i pogledajte ponude.</p></div><span class="category-art '+category+'" aria-hidden="true"></span></div>'+
       '<div class="search-wrap">'+svg("search")+'<input class="search" id="store-search" type="search" placeholder="Pronađi objekat" aria-label="Pronađi objekat"></div>'+
-      '<div class="store-grid" id="filter-list">'+stores.map((s,i)=>'<button class="store-card '+category+'" type="button" data-store="'+escapeHtml(s.id)+'" data-search="'+escapeHtml(s.name.toLowerCase())+'"><span class="store-number">'+(i+1)+'</span><span><span class="store-name">'+escapeHtml(s.name)+'</span><span class="store-sub">Dnevne i sedmične ponude</span></span><span class="chevron" aria-hidden="true">›</span></button>').join("")+'</div>'+
+      '<div class="store-grid" id="filter-list">'+stores.map((s,i)=>'<button class="store-card '+category+'" type="button" data-store="'+escapeHtml(s.id)+'" data-search="'+escapeHtml(fold(s.name))+'"><span class="store-number">'+(i+1)+'</span><span><span class="store-name">'+escapeHtml(s.name)+'</span><span class="store-sub">Dnevne i sedmične ponude</span></span><span class="chevron" aria-hidden="true">›</span></button>').join("")+'</div>'+
       (!stores.length?'<div class="empty-state"><h2>Trenutno nema objekata</h2><p>Novi objekti će se pojaviti kada dodamo njihove ponude.</p></div>':"");
   }
-  function offerCard(o,inSaved=false){
+  // Last date written in valid_until ("23.09.", "21.09.–27.09.", "30.09.2026"); unreadable text never hides an offer.
+  function validUntil(text){
+    const matches=[...String(text||"").matchAll(/(\d{1,2})\.\s*(\d{1,2})\.?\s*(\d{4})?/g)];
+    if(!matches.length)return null;
+    const [,d,m,y]=matches[matches.length-1];
+    const now=new Date();
+    const end=new Date(y?Number(y):now.getFullYear(),Number(m)-1,Number(d),23,59,59);
+    if(end.getDate()!==Number(d)||end.getMonth()!==Number(m)-1)return null;
+    if(!y){
+      const days=(end-now)/864e5;
+      if(days>180)end.setFullYear(end.getFullYear()-1);
+      else if(days<-180)end.setFullYear(end.getFullYear()+1);
+    }
+    return end;
+  }
+  const isActive = o => {const end=validUntil(o.valid);return !end||end>=new Date()};
+  function offerCard(o,inSaved=false,stale=false){
     const key=offerId(o),saved=state.saved.has(key);
-    const source=inSaved?'<p class="offer-source"><strong>'+labels[o.category]+' · '+escapeHtml(o.store)+'</strong><span>'+(o.period==="daily"?"Danas":"Ove sedmice")+'</span></p>':"";
-    const action=inSaved?svg("x")+'<span>Ukloni</span>':svg("bookmark",saved?"currentColor":"none");
-    return '<article class="offer-card'+(inSaved?' saved-offer-card':'')+'" data-search="'+escapeHtml((o.product+" "+o.unit+" "+o.store).toLowerCase())+'"><div class="offer-visual" aria-hidden="true">'+o.emoji+'</div><div class="offer-details">'+source+'<h2 class="offer-name">'+escapeHtml(o.product)+'</h2><div class="offer-unit">'+escapeHtml(o.unit)+'</div><p class="offer-price">'+price(o.price)+(o.oldPrice?'<span class="offer-old">'+price(o.oldPrice)+'</span>':"")+'</p><p class="offer-valid">Važi '+escapeHtml(o.valid||"prema objavi")+'</p></div><button class="save-button '+(saved?"saved":"")+(inSaved?' remove-button':'')+'" type="button" data-save="'+escapeHtml(key)+'" aria-label="'+(inSaved?"Ukloni "+escapeHtml(o.product)+" iz sačuvanih ponuda":saved?"Ukloni sačuvanu ponudu":"Sačuvaj ponudu")+'" aria-pressed="'+saved+'">'+action+'</button></article>';
+    // Active saved offers sit under their store's heading, so only stale ones repeat the store name.
+    const source=inSaved?'<p class="offer-source">'+(stale?'<strong>'+labels[o.category]+' · '+escapeHtml(o.store)+'</strong>':'')+'<span>'+(o.period==="daily"?"Danas":"Ove sedmice")+'</span></p>':"";
+    const action=inSaved?svg("trash"):svg("bookmark",saved?"currentColor":"none");
+    const validLine=stale?'<p class="offer-valid stale-note">Više nije u ponudi</p>':'<p class="offer-valid">Važi '+escapeHtml(o.valid||"prema objavi")+'</p>';
+    return '<article class="offer-card'+(inSaved?' saved-offer-card':'')+(stale?' stale-offer':'')+'" data-search="'+escapeHtml(fold(o.product+" "+o.unit+" "+o.store))+'"><div class="offer-visual" aria-hidden="true">'+o.emoji+'</div><div class="offer-details">'+source+'<h2 class="offer-name">'+escapeHtml(o.product)+'</h2><div class="offer-unit">'+escapeHtml(o.unit)+'</div><p class="offer-price">'+price(o.price)+(o.oldPrice?'<span class="offer-old">'+price(o.oldPrice)+'</span>':"")+'</p>'+validLine+'</div><button class="save-button '+(saved?"saved":"")+(inSaved?' remove-button':'')+'" type="button" data-save="'+escapeHtml(key)+'" aria-label="'+(inSaved?"Ukloni "+escapeHtml(o.product)+" iz sačuvanih ponuda":saved?"Ukloni sačuvanu ponudu":"Sačuvaj ponudu")+'" aria-pressed="'+saved+'">'+action+'</button></article>';
   }
   function offersView(category,store){
-    const list=state.offers.filter(o=>o.category===category&&o.store===store&&o.period===state.period);
+    const list=state.offers.filter(o=>o.category===category&&o.store===store&&o.period===state.period&&isActive(o));
     const count=state.period==="daily"?3:10;
-    return breadcrumb(category,store)+'<div class="section-header"><h1>'+escapeHtml(store)+'</h1><p>'+labels[category]+'</p></div>'+
-      demoNotice()+(state.error?'<p class="status error" role="status">'+escapeHtml(state.error)+'</p>':"")+
+    return breadcrumb(category,store)+'<div class="section-header category-head"><div class="category-head-copy"><h1>'+escapeHtml(store)+'</h1><p>'+labels[category]+'</p></div><span class="category-art '+category+'" aria-hidden="true"></span></div>'+
+      demoNotice()+statusNotice()+
       '<div class="segment" role="group" aria-label="Period akcija"><button type="button" data-period="daily" class="'+(state.period==="daily"?"active":"")+'" aria-pressed="'+(state.period==="daily")+'">Danas</button><button type="button" data-period="weekly" class="'+(state.period==="weekly"?"active":"")+'" aria-pressed="'+(state.period==="weekly")+'">Ove sedmice</button></div>'+
       '<p class="offer-count">'+list.length+' od '+count+' predviđenih proizvoda · '+(state.period==="daily"?"dnevna":"sedmična")+' ponuda</p>'+
       '<div class="search-wrap">'+svg("search")+'<input class="search" id="offer-search" type="search" placeholder="Pronađi proizvod" aria-label="Pronađi proizvod"></div>'+
@@ -159,15 +213,31 @@
       (!list.length?'<div class="empty-state"><h2>Nema ponuda za ovaj period</h2><p>Provjerite ponovo kasnije.</p></div>':"");
   }
   function savedView(){
-    const list=state.offers.filter(o=>state.saved.has(offerId(o)));
+    const activeById=new Map(state.offers.filter(isActive).map(o=>[offerId(o),o]));
+    const list=[],stale=[];
+    for(const [id,copy] of state.saved){
+      if(activeById.has(id))list.push(activeById.get(id));
+      else if(copy)stale.push(copy);
+    }
     const total=list.reduce((sum,o)=>sum+o.price,0);
     const withOldPrice=list.filter(o=>Number.isFinite(o.oldPrice)&&o.oldPrice>o.price);
     const savings=withOldPrice.reduce((sum,o)=>sum+o.oldPrice-o.price,0);
     const withoutOldPrice=list.length-withOldPrice.length;
     const summary='<div class="saved-summary" aria-label="Zbir sačuvanih ponuda"><div class="summary-card"><span>Zbir akcijskih cijena</span><strong>'+price(total)+'</strong></div><div class="summary-card savings"><span>Moguća ušteda</span><strong>'+(withOldPrice.length?price(savings):"—")+'</strong></div></div>'+
       (withoutOldPrice?'<p class="savings-note">Broj ponuda bez stare cijene: '+withoutOldPrice+'. Za njih ušteda nije uračunata.</p>':"");
-    return '<div class="section-header"><h1>Sačuvano</h1><p>Vaše odabrane ponude na ovom uređaju.</p></div>'+demoNotice()+
-      (list.length?summary+'<p class="offer-count">Broj sačuvanih ponuda: '+list.length+'</p><div class="offer-list saved-offer-list">'+list.map(o=>offerCard(o,true)).join("")+'</div>':'<div class="empty-state"><h2>Još nema sačuvanih ponuda</h2><p>Otvorite objekat i dodirnite oznaku uz proizvod.</p></div>');
+    const groups=new Map();
+    for(const o of list){
+      const id=idOf(o.category,o.store);
+      if(!groups.has(id))groups.set(id,[]);
+      groups.get(id).push(o);
+    }
+    const countText=n=>n+" "+(n%10>=2&&n%10<=4&&(n%100<12||n%100>14)?"ponude":"ponuda");
+    const grouped=[...groups.values()].map(items=>'<section class="saved-group"><div class="saved-group-head"><span class="saved-group-name"><strong>'+escapeHtml(items[0].store)+'</strong><span>'+labels[items[0].category]+'</span></span><span class="saved-group-total">'+countText(items.length)+' · '+price(items.reduce((sum,o)=>sum+o.price,0))+'</span></div><div class="offer-list saved-offer-list">'+items.map(o=>offerCard(o,true)).join("")+'</div></section>').join("");
+    const subtitle=list.length?"Broj sačuvanih ponuda: "+list.length+", poredane po prodavnicama.":"Vaše odabrane ponude na ovom uređaju.";
+    return '<div class="section-header category-head saved-head"><div class="category-head-copy"><h1>Sačuvano</h1><p>'+subtitle+'</p></div><span class="saved-head-icon" aria-hidden="true">'+svg("bookmark","currentColor")+'</span></div>'+demoNotice()+
+      (list.length?summary+grouped:
+        !stale.length?'<div class="empty-state"><h2>Još nema sačuvanih ponuda</h2><p>Otvorite objekat i dodirnite oznaku uz proizvod.</p></div>':"")+
+      (stale.length?'<h2 class="stale-heading">Više nije u ponudi</h2><p class="savings-note">Ove ponude su istekle ili su uklonjene iz tabele i nisu uračunate u zbir.</p><div class="offer-list saved-offer-list">'+stale.map(o=>offerCard(o,true,true)).join("")+'</div>':"");
   }
   function allStoresView(){
     return '<div class="section-header"><h1>Prodavnice</h1><p>Izaberite kategoriju i objekat.</p></div><div class="category-grid">'+Object.keys(labels).map(categoryCard).join("")+'</div>';
@@ -193,7 +263,8 @@
     else if(el.id==="nav-saved")navigate("saved");
     else if(el.id==="nav-stores")navigate("all-stores");
     else if(el.id==="header-back"){
-      if(state.view==="offers")navigate("stores",state.category);
+      if(history.state?.depth>0)history.back();
+      else if(state.view==="offers")navigate("stores",state.category);
       else navigate("home");
     }else if(el.dataset.category)navigate("stores",el.dataset.category);
     else if(el.dataset.store){
@@ -202,20 +273,54 @@
     }else if(el.dataset.period){state.period=el.dataset.period;render()}
     else if(el.dataset.save){
       const id=el.dataset.save;
-      if(state.saved.has(id))state.saved.delete(id);else state.saved.add(id);
-      localStorage.setItem("bn-saved",JSON.stringify([...state.saved]));
+      if(state.saved.has(id))state.saved.delete(id);
+      else{const offer=state.offers.find(o=>offerId(o)===id);if(offer)state.saved.set(id,snapshot(offer))}
+      writeSaved();
       render();
     }
   });
   document.addEventListener("input",event=>{
     if(!event.target.matches(".search"))return;
-    const term=event.target.value.trim().toLowerCase();
-    document.querySelectorAll("#filter-list > *").forEach(card=>card.hidden=!card.dataset.search.includes(term));
+    const term=fold(event.target.value);
+    const cards=[...document.querySelectorAll("#filter-list > *")];
+    cards.forEach(card=>card.hidden=!card.dataset.search.includes(term));
+    const list=document.getElementById("filter-list");
+    let empty=document.getElementById("no-results");
+    if(!empty&&list){
+      empty=document.createElement("div");empty.id="no-results";empty.className="empty-state";empty.setAttribute("role","status");
+      list.after(empty);
+    }
+    if(empty){
+      const none=cards.length>0&&cards.every(card=>card.hidden);
+      empty.hidden=!none;
+      empty.innerHTML=none?'<h2>Nema rezultata</h2><p>Ništa ne odgovara pojmu „'+escapeHtml(event.target.value.trim())+'“.</p>':"";
+    }
   });
   const splash=document.getElementById("splash");
-  const dismiss=()=>{splash.classList.add("exit");setTimeout(()=>splash.remove(),370)};
+  const dismiss=()=>{if(!splash.isConnected)return;splash.classList.add("exit");setTimeout(()=>splash.remove(),370)};
   document.getElementById("skip-splash").addEventListener("click",dismiss);
-  if(sessionStorage.getItem("bn-intro-seen")||matchMedia("(prefers-reduced-motion: reduce)").matches){splash.remove()}
-  else{sessionStorage.setItem("bn-intro-seen","1");setTimeout(dismiss,2400)}
+  // Intro: text rises, products hop and drop, a pale yellow then a green curtain pass, and a growing quarter circle reveals the app.
+  // "?uvod" in the address replays it even if it was already seen in this session.
+  const forceIntro=new URLSearchParams(location.search).has("uvod");
+  if(!forceIntro&&(storageGet("sessionStorage","bn-intro-seen")||matchMedia("(prefers-reduced-motion: reduce)").matches)){splash.remove()}
+  else{
+    storageSet("sessionStorage","bn-intro-seen","1");
+    setTimeout(()=>splash.classList.add("sweep"),2250);
+    setTimeout(dismiss,3180);
+  }
+  history.replaceState({view:"home",category:null,store:null,depth:0},"");
+  window.addEventListener("popstate",event=>{
+    const s=event.state||{view:"home"};
+    navigate(s.view,s.category||null,s.store||null,true);
+  });
   loadData();
+  if(sheetUrl){
+    const minutes=Number(window.BN_CONFIG?.refreshMinutes)||15;
+    setInterval(()=>{if(!document.hidden)loadData()},Math.max(1,minutes)*60000);
+    let hiddenAt=0;
+    document.addEventListener("visibilitychange",()=>{
+      if(document.hidden)hiddenAt=Date.now();
+      else if(Date.now()-hiddenAt>60000)loadData();
+    });
+  }
 })();

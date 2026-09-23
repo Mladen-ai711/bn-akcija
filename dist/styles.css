@@ -219,3 +219,109 @@
   .banner h1 { font-size: 1.65rem; }
   .banner-art { width: 158px; right: -21px; }
 }
+.stale-heading { max-width: 850px; margin: 28px 0 6px; font-size: 1.25rem; color: #103e35; }
+.stale-offer .offer-visual, .stale-offer .offer-name, .stale-offer .offer-unit, .stale-offer .offer-price { opacity: .55; }
+.stale-offer .stale-note { color: #ae392b; font-weight: 700; }
+/* Category page: illustration beside the title, yellow underline, and yellow-edged store cards. */
+.category-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-bottom: 12px; border-bottom: 4px solid #ffdf43; }
+.category-head-copy { flex: 1; min-width: 0; }
+.category-head .category-art { flex: 0 0 120px; width: 120px; height: 100px; margin: -10px 0; transform: scale(.8); }
+.store-card { border-left: 8px solid #ffdf43; background: linear-gradient(90deg, #fffbe3, #fff 60%); }
+.store-card .store-number, .store-card.mesara .store-number, .store-card.apoteka .store-number { background: #00a478; color: #fff; }
+/* Store page matches the category page: yellow-edged offer cards (saved list keeps its own look). */
+.offer-card:not(.saved-offer-card) { border-left: 8px solid #ffdf43; background: linear-gradient(90deg, #fffbe3, #fff 60%); }
+.offer-card:not(.saved-offer-card) .offer-visual { background: #fff; }
+/* Saved page: same yellow underline as other pages, offers grouped by store, trash icon in the card corner. */
+.saved-head-icon { flex: 0 0 60px; width: 60px; height: 60px; display: grid; place-items: center; border-radius: 50%; background: #00a478; color: #fff; }
+.saved-head-icon svg { width: 28px; height: 28px; }
+.saved-head { margin-bottom: 18px; }
+.saved-group { max-width: 850px; margin: 22px 0 0; }
+.saved-group-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; margin: 0 0 10px; padding: 0 2px; }
+.saved-group-name strong { font-size: 1.2rem; font-weight: 800; }
+.saved-group-name span { margin-left: 8px; color: #52665f; font-size: .92rem; }
+.saved-group-total { color: #006e56; font-size: .95rem; font-weight: 800; }
+.saved-offer-card, .saved-offer-card.stale-offer { grid-template-columns: 82px minmax(0,1fr) 44px; gap: 14px; align-items: start; border-left: 8px solid #ffdf43; background: linear-gradient(90deg, #fffbe3, #fff 60%); }
+.saved-offer-card .offer-visual { background: #fff; }
+.saved-offer-card.stale-offer { border-left-color: #d6ddd9; background: #fff; }
+.offer-source { margin: 0 0 6px; }
+.saved-offer-card .remove-button { width: 44px; min-width: 0; height: 44px; padding: 0; grid-column: 3; justify-self: end; margin: 0; }
+.saved-offer-card .remove-button svg { width: 21px; height: 21px; }
+@media (max-width: 620px) {
+  .saved-offer-card, .saved-offer-card.stale-offer { grid-template-columns: 68px minmax(0,1fr) 42px; gap: 10px; }
+  .saved-offer-card .remove-button { grid-column: 3; width: 42px; height: 42px; }
+}
+.store-card .store-number { width: 46px; height: 46px; flex-basis: 46px; border-radius: 14px; font-size: 1.35rem; }
+/* Intro in the style of the Keeta splash: plain yellow, text rises at the bottom,
+   products fly in from the top right and settle, then a green sweep hands over to the app. */
+.splash { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding: 0 20px calc(max(30px, env(safe-area-inset-bottom)) + 92px); }
+.splash::before, .splash::after, .splash-wave-bottom { display: none; }
+.splash-content { position: relative; z-index: 2; animation: none; }
+.splash .brand-large { animation: rise .5s .05s both; }
+.splash-items { position: relative; z-index: 1; flex: none; width: 380px; height: 300px; margin: 0 -100px 18px; transform-origin: 50% 100%; left: 7px; }
+/* Products sit on a floor, all hop up together, hang in the air, then drop back one by one with a small bounce.
+   The outer span lifts by --lift; the image falls the same distance, so each ends where it started. */
+/* Each product has its own contact shadow on the floor: it shrinks and fades while the product is in the air
+   and grows back as the product falls, reaching full strength at the moment of landing. */
+.splash-shadow { position: absolute; z-index: 0; height: 16px; border-radius: 50%; background: radial-gradient(closest-side, #8a6a0060, #8a6a0026 60%, transparent); animation: shadow-away .5s cubic-bezier(.2,.8,.3,1) both, shadow-back .36s cubic-bezier(.5,0,.9,.5) forwards; animation-delay: var(--hop), var(--drop); }
+.shadow-pharmacy { left: 8px; bottom: 76px; width: 110px; }
+.shadow-bag { left: 236px; bottom: 68px; width: 150px; }
+.shadow-basket { left: 66px; bottom: 3px; width: 135px; }
+.shadow-meat { left: 166px; bottom: -16px; width: 150px; }
+@keyframes shadow-away {
+  0% { opacity: 0; transform: scale(.6); }
+  20% { opacity: 1; transform: scale(1); }
+  100% { opacity: .18; transform: scale(.4); }
+}
+@keyframes shadow-back {
+  0% { opacity: .18; transform: scale(.4); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.splash-item { --lift: min(230px, 20vh); position: absolute; display: block; animation: splash-hop .5s cubic-bezier(.2,.8,.3,1) both; animation-delay: var(--hop); }
+.splash-item img { display: block; width: 100%; height: auto; transform-origin: 50% 100%; filter: drop-shadow(0 3px 4px #7a5c001f); animation: splash-drop .7s both; animation-delay: var(--drop); }
+/* Hop and drop times are shared by each product and its shadow. */
+.item-pharmacy, .shadow-pharmacy { --hop: .3s; --drop: .85s; }
+.item-bag, .shadow-bag { --hop: .34s; --drop: 1s; }
+.item-basket, .shadow-basket { --hop: .38s; --drop: 1.15s; }
+.item-meat, .shadow-meat { --hop: .42s; --drop: 1.3s; }
+.item-pharmacy { left: -14px; bottom: 84px; width: 140px; --tilt: 6deg; --spin: 18deg; --air: 22px; }
+.item-bag { left: 190px; bottom: 68px; width: 215px; --tilt: 4deg; --spin: -16deg; --air: -22px; }
+.item-basket { left: 50px; bottom: 10px; width: 165px; --tilt: -5deg; --spin: 28deg; --air: -10px; }
+.item-meat { left: 152px; bottom: -8px; width: 178px; --tilt: -3deg; --spin: -30deg; --air: 30px; }
+@keyframes splash-hop {
+  0% { opacity: 0; transform: translate(0, 0) scale(.55); }
+  25% { opacity: 1; }
+  100% { opacity: 1; transform: translate(var(--air), calc(var(--lift) * -1)); }
+}
+@keyframes splash-drop {
+  0% { transform: translate(0, 0) rotate(var(--spin)); animation-timing-function: cubic-bezier(.5,0,.9,.5); }
+  52% { transform: translate(calc(var(--air) * -1), var(--lift)) rotate(var(--tilt)) scale(1, .9); animation-timing-function: ease-out; }
+  60% { transform: translate(calc(var(--air) * -1), var(--lift)) rotate(var(--tilt)) scale(1.07, .76); animation-timing-function: cubic-bezier(.2,.7,.4,1); }
+  76% { transform: translate(calc(var(--air) * -1), calc(var(--lift) - 34px)) rotate(var(--tilt)) scale(.97, .97); animation-timing-function: cubic-bezier(.6,0,.9,.5); }
+  90% { transform: translate(calc(var(--air) * -1), var(--lift)) rotate(var(--tilt)) scale(1.03, .84); }
+  100% { transform: translate(calc(var(--air) * -1), var(--lift)) rotate(var(--tilt)); }
+}
+/* Curtain in layers from the top left corner, behind the products and text (as in the Keeta intro):
+   a pale yellow wave first, then the green one with a lime leading edge. */
+.splash-sweep { position: absolute; z-index: 0; left: -70vmax; top: -70vmax; width: 140vmax; height: 140vmax; border-radius: 50%; transform: scale(0); pointer-events: none; }
+.sweep-light { background: #fff27a; }
+.sweep-green { background: radial-gradient(closest-side, #00a478 0 91%, #7fd66a 96%, #c8f25a 100%); }
+.splash.sweep .sweep-light { animation: splash-sweep .77s cubic-bezier(.45,0,.35,1) forwards; }
+.splash.sweep .sweep-green { animation: splash-sweep .6s cubic-bezier(.5,0,.3,1) .22s both; }
+/* Right behind the green, a growing quarter circle from the same corner cuts through the whole intro and reveals the app,
+   so the green stays only as a band on the edge of the opening. Browsers without @property simply fade out at the end. */
+@property --reveal { syntax: "<length>"; inherits: false; initial-value: 0px; }
+.splash.sweep { -webkit-mask-image: radial-gradient(circle at 0 0, transparent var(--reveal), #000 calc(var(--reveal) + 1.5px)); mask-image: radial-gradient(circle at 0 0, transparent var(--reveal), #000 calc(var(--reveal) + 1.5px)); animation: splash-reveal .6s cubic-bezier(.5,0,.3,1) .31s both; }
+@keyframes splash-reveal { from { --reveal: 0px; } to { --reveal: 154vmax; } }
+.splash.sweep .skip-splash { opacity: 0; transition: opacity .15s; }
+@keyframes splash-sweep { to { transform: scale(2.2); } }
+.skip-splash { z-index: 5; }
+/* The products (about 400px wide with their jump) shrink to fit both the screen width and height;
+   the smaller of the two scales wins. The negative side margins keep the box centred even on screens narrower than it. */
+.splash-items { --fit-w: 1; --fit-h: 1; transform: scale(min(var(--fit-w), var(--fit-h))); }
+@media (max-width: 439px) { .splash-items { --fit-w: .9; } }
+@media (max-width: 399px) { .splash-items { --fit-w: .82; } }
+@media (max-width: 359px) { .splash-items { --fit-w: .72; } }
+@media (max-height: 820px) { .splash-items { --fit-h: .82; } .splash-item { --lift: 15vh; } }
+@media (max-height: 700px) { .splash-items { --fit-h: .72; } .splash-item { --lift: 12vh; } .splash-content p { font-size: 2.3rem; } }
+@media (orientation: landscape) { .splash-item { --lift: 12vh; } }
+@media (max-height: 600px) { .splash-items { --fit-h: .62; } .splash-item { --lift: 9vh; } }

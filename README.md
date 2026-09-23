@@ -34,7 +34,9 @@ Obavezne kolone: `category, store, period, product, unit, price, valid_until`. O
 - `category`: `market`, `mesara` ili `apoteka`
 - `period`: `daily` ili `weekly`
 - `price` i `old_price`: npr. `1,65` ili `1.65`
-- `valid_until`: tekst datuma koji će biti prikazan korisnicima
+- `valid_until`: tekst datuma koji će biti prikazan korisnicima, npr. `23.09.`, `21.09.-27.09.` ili `30.09.2026`. Posljednji datum u tekstu je zadnji dan akcije: poslije njega ponuda se više ne prikazuje. Ako datum ne može da se pročita, ponuda ostaje vidljiva.
+
+Red sa greškom (npr. bez cijene) se preskače, a aplikacija navede broj tog reda u poruci. Tabela se sama osvježava na svakih `refreshMinutes` minuta iz `config.js`.
 
 Novi naziv u koloni `store` automatski dodaje objekat. Uklanjanjem svih njegovih redova objekat nestaje. Aplikacija prikazuje najviše tri dnevna i deset sedmičnih proizvoda po objektu, prema redoslijedu u tabeli. Ako učitavanje ne uspije, prikazaće jasno označene primjere i poruku o grešci.
 
