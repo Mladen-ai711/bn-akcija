@@ -128,6 +128,13 @@
     const v=String(value ?? "").trim().replace(/\s|KM/gi,"");
     return Number(v.includes(",")?v.replace(/\./g,"").replace(",","."):v);
   }
+  // Google Drive-ov običan link za dijeljenje otvara njegov pregledač, ne samu sliku; ovdje se prepoznaje i pretvara u link koji se može prikazati kao <img>.
+  function normalizeImageUrl(url){
+    const value=String(url||"").trim();
+    if(!value)return "";
+    const match=value.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?id=)([\w-]+)/);
+    return match?"https://lh3.googleusercontent.com/d/"+match[1]:value;
+  }
   function dataFromCSV(csv){
     const rows=parseCSV(csv.trim().replace(/^\uFEFF/,""));
     if(rows.length<2)throw Error("Tabela nema redove sa ponudama.");
@@ -148,7 +155,7 @@
       const count=offers.filter(o=>o.category===category&&o.store===store&&o.period===period).length;
       if(count >= (period==="daily"?3:10))continue;
       // Kolona "image" (opciono): direktan link ka fotografiji iz tabele. Ako je nema, koristi se poznata sličica po nazivu proizvoda, pa tek onda emoji kategorije.
-      offers.push({category,store,period,product,unit,price:current,oldPrice:Number.isFinite(oldPrice)&&oldPrice>current?oldPrice:null,valid:get("valid_until"),image:get("image")||null,emoji:({market:"🛒",mesara:"🥩",apoteka:"🧴"})[category]});
+      offers.push({category,store,period,product,unit,price:current,oldPrice:Number.isFinite(oldPrice)&&oldPrice>current?oldPrice:null,valid:get("valid_until"),image:normalizeImageUrl(get("image"))||null,emoji:({market:"🛒",mesara:"🥩",apoteka:"🧴"})[category]});
     }
     if(!offers.length)throw Error("Tabela nema valjanih ponuda.");
     const warning=badRows.length?"Preskočeni neispravni redovi u tabeli: "+badRows.slice(0,10).join(", ")+(badRows.length>10?" i još "+(badRows.length-10):"")+".":"";
@@ -172,7 +179,7 @@
       if(!period||!product||!unit||!Number.isFinite(current)||current<=0){badRows.push(index+2);continue}
       const count=offers.filter(o=>o.period===period).length;
       if(count >= (period==="daily"?3:10))continue;
-      offers.push({category,store,period,product,unit,price:current,oldPrice:Number.isFinite(oldPrice)&&oldPrice>current?oldPrice:null,valid:get("valid_until"),image:get("image")||null,emoji:({market:"🛒",mesara:"🥩",apoteka:"🧴"})[category]});
+      offers.push({category,store,period,product,unit,price:current,oldPrice:Number.isFinite(oldPrice)&&oldPrice>current?oldPrice:null,valid:get("valid_until"),image:normalizeImageUrl(get("image"))||null,emoji:({market:"🛒",mesara:"🥩",apoteka:"🧴"})[category]});
     }
     if(!offers.length)throw Error("list nema valjanih ponuda");
     return {offers,badRows};

@@ -35,7 +35,7 @@ Obavezne kolone: `category, store, period, product, unit, price, valid_until`. O
 - `period`: `daily` ili `weekly`
 - `price` i `old_price`: npr. `1,65` ili `1.65`
 - `valid_until`: tekst datuma koji će biti prikazan korisnicima, npr. `23.09.`, `21.09.-27.09.` ili `30.09.2026`. Posljednji datum u tekstu je zadnji dan akcije: poslije njega ponuda se više ne prikazuje. Ako datum ne može da se pročita, ponuda ostaje vidljiva.
-- `image`: direktan link ka fotografiji proizvoda (mora se završavati na sliku, npr. `.jpg`/`.png`, ne link ka stranici). Ako je prazna, a naziv proizvoda se poklapa sa jednim od već pripremljenih (Mlijeko 2,8%, Jaja, Pileći file...), prikazuje se ta gotova sličica; inače se prikazuje opšta ikonica kategorije. Ako link ne uspije da se učita, aplikacija se sama vrati na ikonicu.
+- `image`: direktan link ka fotografiji proizvoda (mora se završavati na sliku, npr. `.jpg`/`.png`, ne link ka stranici). Ako je prazna, a naziv proizvoda se poklapa sa jednim od već pripremljenih (Mlijeko 2,8%, Jaja, Pileći file...), prikazuje se ta gotova sličica; inače se prikazuje opšta ikonica kategorije. Ako link ne uspije da se učita, aplikacija se sama vrati na ikonicu. Običan link za dijeljenje sa Google Drive-a (npr. `drive.google.com/file/d/.../view?usp=sharing`) se automatski prepoznaje i pretvara u oblik pogodan za prikaz — nije potrebno ručno mijenjati.
 
 Red sa greškom (npr. bez cijene) se preskače, a aplikacija navede broj tog reda u poruci. Tabela se sama osvježava na svakih `refreshMinutes` minuta iz `config.js`.
 
