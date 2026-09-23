@@ -14,6 +14,28 @@
   const labels = {market:"Marketi",mesara:"Mesare",apoteka:"Apoteke"};
   const singular = {market:"Market",mesara:"Mesara",apoteka:"Apoteka"};
   const descriptions = {market:"Namirnice i kućne potrepštine",mesara:"Meso i mesne prerađevine",apoteka:"Njega i apotekarski proizvodi"};
+  // Fotorealistične sličice za poznate proizvode iz menija; nepoznati proizvodi (npr. iz tabele) i dalje dobijaju emoji.
+  const productImages = {
+    "Mlijeko 2,8%":"mlijeko.png","Jaja":"jaja.png","Jabuke":"jabuke.png","Suncokretovo ulje":"suncokretovo-ulje.png",
+    "Brašno":"brasno.png","Kafa":"kafa.png","Deterdžent":"deterdzent.png","Šećer":"secer.png","Jogurt":"jogurt.png",
+    "Riža":"riza.png","Banane":"banane.png","Hljeb":"hljeb.png","Pasta":"pasta.png",
+    "Pileći file":"pileci-file.png","Juneće mljeveno meso":"junece-mljeveno-meso.png","Pileći batak":"pileci-batak.png",
+    "Juneći but":"junece-but.png","Ćevapi":"cevapi.png","Svinjski vrat":"svinjski-vrat.png","Kobasica":"kobasica.png",
+    "Pileća krilca":"pileca-krilca.png","Juneća plećka":"junece-plecka.png","Pljeskavice":"pljeskavice.png","Pureći file":"pureci-file.png",
+    "Krema za ruke":"krema-za-ruke.png","Balzam za usne":"balzam-za-usne.png","Šampon":"sampon.png","Gel za tuširanje":"gel-za-tusiranje.png",
+    "Pasta za zube":"pasta-za-zube.png","Četkica za zube":"cetkica-za-zube.png","Losion za tijelo":"losion-za-tijelo.png",
+    "Krema za lice":"krema-za-lice.png","Sapun":"sapun.png","Vlažne maramice":"vlazne-maramice.png"
+  };
+  // Logotipi za poznate objekte; objekti bez loga i dalje prikazuju samo ime.
+  const storeLogos = {"Tropik":"tropik.png","Fortuna":"fortuna.webp"};
+  // Bost nema jedinstvenu sliku sa ikonicom i nazivom zajedno, pa se ikonica i uvećan natpis slažu ovdje.
+  const storeIconText = {"Bost":{icon:"bost-icon.png",word:"bost-word.png"}};
+  const storeNameHtml = (name,cls) => {
+    const combo=storeIconText[name];
+    if(combo)return '<img class="'+cls+'-icon" src="./assets/logos/'+combo.icon+'" alt=""><img class="'+cls+'-word" src="./assets/logos/'+combo.word+'" alt="'+escapeHtml(name)+'">';
+    return storeLogos[name]?'<img class="'+cls+'" src="./assets/logos/'+storeLogos[name]+'" alt="'+escapeHtml(name)+'">':escapeHtml(name);
+  };
+  const hasStoreLogo = name => Boolean(storeLogos[name]||storeIconText[name]);
   const main = document.getElementById("app-main");
   const storageGet = (store,key) => {try{return window[store].getItem(key)}catch{return null}};
   const storageSet = (store,key,value) => {try{window[store].setItem(key,value)}catch{}};
@@ -54,11 +76,12 @@
       weekly:[["Krema za ruke","75 ml",3.90,5.20,"🧴"],["Šampon","250 ml",5.40,6.90,"🧴"],["Gel za tuširanje","400 ml",4.40,5.80,"🧴"],["Pasta za zube","75 ml",2.70,3.50,"🦷"],["Četkica za zube","1 kom",2.10,2.90,"🦷"],["Balzam za usne","4 g",2.80,3.60,"💄"],["Losion za tijelo","250 ml",6.90,8.50,"🧴"],["Krema za lice","50 ml",8.90,11.20,"🧴"],["Sapun","100 g",1.20,1.70,"🧼"],["Vlažne maramice","72 kom",3.30,4.20,"🧻"]]
     }
   };
+  const marketNames = ["Tropik","Fortuna","Bost"];
   function demoData(){
     const stores=[]; const offers=[];
     for(const category of Object.keys(labels)){
       for(let i=1;i<=3;i++){
-        const store=singular[category]+" "+i;
+        const store=category==="market"?marketNames[i-1]:singular[category]+" "+i;
         stores.push({id:idOf(category,store),category,name:store});
         for(const period of ["daily","weekly"]){
           demoProducts[category][period].forEach(([product,unit,current,old,emoji])=>{
@@ -174,7 +197,7 @@
     const stores=state.stores.filter(s=>s.category===category);
     return breadcrumb(category)+'<div class="section-header category-head"><div class="category-head-copy"><h1>'+labels[category]+'</h1><p>Izaberite objekat i pogledajte ponude.</p></div><span class="category-art '+category+'" aria-hidden="true"></span></div>'+
       '<div class="search-wrap">'+svg("search")+'<input class="search" id="store-search" type="search" placeholder="Pronađi objekat" aria-label="Pronađi objekat"></div>'+
-      '<div class="store-grid" id="filter-list">'+stores.map((s,i)=>'<button class="store-card '+category+'" type="button" data-store="'+escapeHtml(s.id)+'" data-search="'+escapeHtml(fold(s.name))+'"><span class="store-number">'+(i+1)+'</span><span><span class="store-name">'+escapeHtml(s.name)+'</span><span class="store-sub">Dnevne i sedmične ponude</span></span><span class="chevron" aria-hidden="true">›</span></button>').join("")+'</div>'+
+      '<div class="store-grid" id="filter-list">'+stores.map((s,i)=>'<button class="store-card '+category+'" type="button" data-store="'+escapeHtml(s.id)+'" data-search="'+escapeHtml(fold(s.name))+'"><span class="store-number">'+(i+1)+'</span><span class="store-copy"><span class="store-name'+(hasStoreLogo(s.name)?' has-logo':'')+'">'+storeNameHtml(s.name,"store-logo")+'</span><span class="store-sub">Dnevne i sedmične ponude</span></span><span class="chevron" aria-hidden="true">›</span></button>').join("")+'</div>'+
       (!stores.length?'<div class="empty-state"><h2>Trenutno nema objekata</h2><p>Novi objekti će se pojaviti kada dodamo njihove ponude.</p></div>':"");
   }
   // Last date written in valid_until ("23.09.", "21.09.–27.09.", "30.09.2026"); unreadable text never hides an offer.
@@ -199,12 +222,14 @@
     const source=inSaved?'<p class="offer-source">'+(stale?'<strong>'+labels[o.category]+' · '+escapeHtml(o.store)+'</strong>':'')+'<span>'+(o.period==="daily"?"Danas":"Ove sedmice")+'</span></p>':"";
     const action=inSaved?svg("trash"):svg("bookmark",saved?"currentColor":"none");
     const validLine=stale?'<p class="offer-valid stale-note">Više nije u ponudi</p>':'<p class="offer-valid">Važi '+escapeHtml(o.valid||"prema objavi")+'</p>';
-    return '<article class="offer-card'+(inSaved?' saved-offer-card':'')+(stale?' stale-offer':'')+'" data-search="'+escapeHtml(fold(o.product+" "+o.unit+" "+o.store))+'"><div class="offer-visual" aria-hidden="true">'+o.emoji+'</div><div class="offer-details">'+source+'<h2 class="offer-name">'+escapeHtml(o.product)+'</h2><div class="offer-unit">'+escapeHtml(o.unit)+'</div><p class="offer-price">'+price(o.price)+(o.oldPrice?'<span class="offer-old">'+price(o.oldPrice)+'</span>':"")+'</p>'+validLine+'</div><button class="save-button '+(saved?"saved":"")+(inSaved?' remove-button':'')+'" type="button" data-save="'+escapeHtml(key)+'" aria-label="'+(inSaved?"Ukloni "+escapeHtml(o.product)+" iz sačuvanih ponuda":saved?"Ukloni sačuvanu ponudu":"Sačuvaj ponudu")+'" aria-pressed="'+saved+'">'+action+'</button></article>';
+    const image=productImages[o.product];
+    const visual=image?'<img src="./assets/products/'+image+'" alt="">':o.emoji;
+    return '<article class="offer-card'+(inSaved?' saved-offer-card':'')+(stale?' stale-offer':'')+'" data-search="'+escapeHtml(fold(o.product+" "+o.unit+" "+o.store))+'"><div class="offer-visual" aria-hidden="true">'+visual+'</div><div class="offer-details">'+source+'<h2 class="offer-name">'+escapeHtml(o.product)+'</h2><div class="offer-unit">'+escapeHtml(o.unit)+'</div><p class="offer-price">'+price(o.price)+(o.oldPrice?'<span class="offer-old">'+price(o.oldPrice)+'</span>':"")+'</p>'+validLine+'</div><button class="save-button '+(saved?"saved":"")+(inSaved?' remove-button':'')+'" type="button" data-save="'+escapeHtml(key)+'" aria-label="'+(inSaved?"Ukloni "+escapeHtml(o.product)+" iz sačuvanih ponuda":saved?"Ukloni sačuvanu ponudu":"Sačuvaj ponudu")+'" aria-pressed="'+saved+'">'+action+'</button></article>';
   }
   function offersView(category,store){
     const list=state.offers.filter(o=>o.category===category&&o.store===store&&o.period===state.period&&isActive(o));
     const count=state.period==="daily"?3:10;
-    return breadcrumb(category,store)+'<div class="section-header category-head"><div class="category-head-copy"><h1>'+escapeHtml(store)+'</h1><p>'+labels[category]+'</p></div><span class="category-art '+category+'" aria-hidden="true"></span></div>'+
+    return breadcrumb(category,store)+'<div class="section-header category-head"><div class="category-head-copy"><h1'+(hasStoreLogo(store)?' class="has-logo"':'')+'>'+storeNameHtml(store,"store-logo-lg")+'</h1><p>'+labels[category]+'</p></div><span class="category-art '+category+'" aria-hidden="true"></span></div>'+
       demoNotice()+statusNotice()+
       '<div class="segment" role="group" aria-label="Period akcija"><button type="button" data-period="daily" class="'+(state.period==="daily"?"active":"")+'" aria-pressed="'+(state.period==="daily")+'">Danas</button><button type="button" data-period="weekly" class="'+(state.period==="weekly"?"active":"")+'" aria-pressed="'+(state.period==="weekly")+'">Ove sedmice</button></div>'+
       '<p class="offer-count">'+list.length+' od '+count+' predviđenih proizvoda · '+(state.period==="daily"?"dnevna":"sedmična")+' ponuda</p>'+
