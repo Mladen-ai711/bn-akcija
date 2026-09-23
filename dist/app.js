@@ -49,8 +49,16 @@
     }catch{return []}
   };
   const writeSaved = () => storageSet("localStorage","bn-saved",JSON.stringify([...state.saved]));
-  const snapshot = o => ({category:o.category,store:o.store,period:o.period,product:o.product,unit:o.unit,price:o.price,oldPrice:o.oldPrice,valid:o.valid,emoji:o.emoji});
-  const state = {view:"home",category:null,store:null,period:"daily",stores:[],offers:[],demo:true,error:"",warning:"",saved:new Map(readSaved())};
+  const snapshot = (o,qty=1) => ({category:o.category,store:o.store,period:o.period,product:o.product,unit:o.unit,price:o.price,oldPrice:o.oldPrice,valid:o.valid,emoji:o.emoji,qty});
+  const state = {view:"home",category:null,store:null,period:"daily",stores:[],offers:[],demo:true,error:"",warning:"",saved:new Map(readSaved()),qty:new Map()};
+  // Količina: dok ponuda nije sačuvana pamti se privremeno (qty mapa); nakon čuvanja živi u sačuvanoj kopiji, da bi ostala i poslije osvježavanja.
+  const MAX_QTY=99;
+  const getQty = key => state.saved.has(key) ? (state.saved.get(key).qty||1) : (state.qty.get(key)||1);
+  const setQty = (key,qty) => {
+    qty=Math.max(1,Math.min(MAX_QTY,Math.round(qty)));
+    if(state.saved.has(key)){state.saved.set(key,{...state.saved.get(key),qty});writeSaved()}
+    else state.qty.set(key,qty);
+  };
   const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
   // Search ignores case and diacritics, so "secer" finds "Šećer" and "dj" finds "đ".
   const fold = value => String(value ?? "").toLowerCase().replace(/đ/g,"dj").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/\s+/g," ").trim();
@@ -161,7 +169,9 @@
     let savedChanged=false;
     for(const o of state.offers){
       const id=offerId(o);
-      if(state.saved.has(id)&&JSON.stringify(state.saved.get(id))!==JSON.stringify(snapshot(o))){state.saved.set(id,snapshot(o));savedChanged=true}
+      if(!state.saved.has(id))continue;
+      const fresh=snapshot(o,state.saved.get(id).qty||1);
+      if(JSON.stringify(state.saved.get(id))!==JSON.stringify(fresh)){state.saved.set(id,fresh);savedChanged=true}
     }
     if(savedChanged)writeSaved();
     const current=JSON.stringify([state.offers,state.error,state.warning]);
@@ -180,7 +190,6 @@
   function categoryCard(category){
     return '<button class="category-card" type="button" data-category="'+category+'"><span class="category-art '+category+'" aria-hidden="true"></span><span class="category-copy"><span class="category-title">'+labels[category]+'</span><span class="category-desc">'+descriptions[category]+'</span></span><span class="chevron" aria-hidden="true">›</span></button>';
   }
-  function demoNotice(){return state.demo?'<span class="example-label">Primjeri cijena — nisu stvarne akcije</span>':""}
   function statusNotice(){
     return [state.error,state.warning].filter(Boolean).map(text=>'<p class="status error" role="status">'+escapeHtml(text)+'</p>').join("");
   }
@@ -224,13 +233,16 @@
     const validLine=stale?'<p class="offer-valid stale-note">Više nije u ponudi</p>':'<p class="offer-valid">Važi '+escapeHtml(o.valid||"prema objavi")+'</p>';
     const image=productImages[o.product];
     const visual=image?'<img src="./assets/products/'+image+'" alt="">':o.emoji;
-    return '<article class="offer-card'+(inSaved?' saved-offer-card':'')+(stale?' stale-offer':'')+'" data-search="'+escapeHtml(fold(o.product+" "+o.unit+" "+o.store))+'"><div class="offer-visual" aria-hidden="true">'+visual+'</div><div class="offer-details">'+source+'<h2 class="offer-name">'+escapeHtml(o.product)+'</h2><div class="offer-unit">'+escapeHtml(o.unit)+'</div><p class="offer-price">'+price(o.price)+(o.oldPrice?'<span class="offer-old">'+price(o.oldPrice)+'</span>':"")+'</p>'+validLine+'</div><button class="save-button '+(saved?"saved":"")+(inSaved?' remove-button':'')+'" type="button" data-save="'+escapeHtml(key)+'" aria-label="'+(inSaved?"Ukloni "+escapeHtml(o.product)+" iz sačuvanih ponuda":saved?"Ukloni sačuvanu ponudu":"Sačuvaj ponudu")+'" aria-pressed="'+saved+'">'+action+'</button></article>';
+    const qty=getQty(key);
+    const qtyRow='<div class="qty-row"><span class="qty-label">Količina</span><div class="qty-stepper"><button type="button" class="qty-btn" data-qty="'+escapeHtml(key)+'" data-dir="-1" aria-label="Smanji količinu">−</button><span class="qty-value" aria-live="polite">'+qty+'</span><button type="button" class="qty-btn" data-qty="'+escapeHtml(key)+'" data-dir="1" aria-label="Povećaj količinu">+</button></div></div>';
+    const totalLine=qty>1?'<p class="offer-total">Ukupno: '+price(o.price*qty)+'</p>':"";
+    return '<article class="offer-card'+(inSaved?' saved-offer-card':'')+(stale?' stale-offer':'')+'" data-search="'+escapeHtml(fold(o.product+" "+o.unit+" "+o.store))+'"><div class="offer-visual" aria-hidden="true">'+visual+'</div><div class="offer-details">'+source+'<h2 class="offer-name">'+escapeHtml(o.product)+'</h2><div class="offer-unit">'+escapeHtml(o.unit)+'</div>'+qtyRow+'<p class="offer-price">'+price(o.price)+(o.oldPrice?'<span class="offer-old">'+price(o.oldPrice)+'</span>':"")+'</p>'+totalLine+validLine+'</div><button class="save-button '+(saved?"saved":"")+(inSaved?' remove-button':'')+'" type="button" data-save="'+escapeHtml(key)+'" aria-label="'+(inSaved?"Ukloni "+escapeHtml(o.product)+" iz sačuvanih ponuda":saved?"Ukloni sačuvanu ponudu":"Sačuvaj ponudu")+'" aria-pressed="'+saved+'">'+action+'</button></article>';
   }
   function offersView(category,store){
     const list=state.offers.filter(o=>o.category===category&&o.store===store&&o.period===state.period&&isActive(o));
     const count=state.period==="daily"?3:10;
     return breadcrumb(category,store)+'<div class="section-header category-head"><div class="category-head-copy"><h1'+(hasStoreLogo(store)?' class="has-logo"':'')+'>'+storeNameHtml(store,"store-logo-lg")+'</h1><p>'+labels[category]+'</p></div><span class="category-art '+category+'" aria-hidden="true"></span></div>'+
-      demoNotice()+statusNotice()+
+      statusNotice()+
       '<div class="segment" role="group" aria-label="Period akcija"><button type="button" data-period="daily" class="'+(state.period==="daily"?"active":"")+'" aria-pressed="'+(state.period==="daily")+'">Danas</button><button type="button" data-period="weekly" class="'+(state.period==="weekly"?"active":"")+'" aria-pressed="'+(state.period==="weekly")+'">Ove sedmice</button></div>'+
       '<p class="offer-count">'+list.length+' od '+count+' predviđenih proizvoda · '+(state.period==="daily"?"dnevna":"sedmična")+' ponuda</p>'+
       '<div class="search-wrap">'+svg("search")+'<input class="search" id="offer-search" type="search" placeholder="Pronađi proizvod" aria-label="Pronađi proizvod"></div>'+
@@ -241,12 +253,12 @@
     const activeById=new Map(state.offers.filter(isActive).map(o=>[offerId(o),o]));
     const list=[],stale=[];
     for(const [id,copy] of state.saved){
-      if(activeById.has(id))list.push(activeById.get(id));
+      if(activeById.has(id))list.push({...activeById.get(id),qty:copy?.qty||1});
       else if(copy)stale.push(copy);
     }
-    const total=list.reduce((sum,o)=>sum+o.price,0);
+    const total=list.reduce((sum,o)=>sum+o.price*o.qty,0);
     const withOldPrice=list.filter(o=>Number.isFinite(o.oldPrice)&&o.oldPrice>o.price);
-    const savings=withOldPrice.reduce((sum,o)=>sum+o.oldPrice-o.price,0);
+    const savings=withOldPrice.reduce((sum,o)=>sum+(o.oldPrice-o.price)*o.qty,0);
     const withoutOldPrice=list.length-withOldPrice.length;
     const summary='<div class="saved-summary" aria-label="Zbir sačuvanih ponuda"><div class="summary-card"><span>Zbir akcijskih cijena</span><strong>'+price(total)+'</strong></div><div class="summary-card savings"><span>Moguća ušteda</span><strong>'+(withOldPrice.length?price(savings):"—")+'</strong></div></div>'+
       (withoutOldPrice?'<p class="savings-note">Broj ponuda bez stare cijene: '+withoutOldPrice+'. Za njih ušteda nije uračunata.</p>':"");
@@ -257,9 +269,9 @@
       groups.get(id).push(o);
     }
     const countText=n=>n+" "+(n%10>=2&&n%10<=4&&(n%100<12||n%100>14)?"ponude":"ponuda");
-    const grouped=[...groups.values()].map(items=>'<section class="saved-group"><div class="saved-group-head"><span class="saved-group-name"><strong>'+escapeHtml(items[0].store)+'</strong><span>'+labels[items[0].category]+'</span></span><span class="saved-group-total">'+countText(items.length)+' · '+price(items.reduce((sum,o)=>sum+o.price,0))+'</span></div><div class="offer-list saved-offer-list">'+items.map(o=>offerCard(o,true)).join("")+'</div></section>').join("");
+    const grouped=[...groups.values()].map(items=>'<section class="saved-group"><div class="saved-group-head"><span class="saved-group-name"><strong>'+escapeHtml(items[0].store)+'</strong><span>'+labels[items[0].category]+'</span></span><span class="saved-group-total">'+countText(items.length)+' · '+price(items.reduce((sum,o)=>sum+o.price*o.qty,0))+'</span></div><div class="offer-list saved-offer-list">'+items.map(o=>offerCard(o,true)).join("")+'</div></section>').join("");
     const subtitle=list.length?"Broj sačuvanih ponuda: "+list.length+", poredane po prodavnicama.":"Vaše odabrane ponude na ovom uređaju.";
-    return '<div class="section-header category-head saved-head"><div class="category-head-copy"><h1>Sačuvano</h1><p>'+subtitle+'</p></div><span class="saved-head-icon" aria-hidden="true">'+svg("bookmark","currentColor")+'</span></div>'+demoNotice()+
+    return '<div class="section-header category-head saved-head"><div class="category-head-copy"><h1>Sačuvano</h1><p>'+subtitle+'</p></div><span class="saved-head-icon" aria-hidden="true">'+svg("bookmark","currentColor")+'</span></div>'+
       (list.length?summary+grouped:
         !stale.length?'<div class="empty-state"><h2>Još nema sačuvanih ponuda</h2><p>Otvorite objekat i dodirnite oznaku uz proizvod.</p></div>':"")+
       (stale.length?'<h2 class="stale-heading">Više nije u ponudi</h2><p class="savings-note">Ove ponude su istekle ili su uklonjene iz tabele i nisu uračunate u zbir.</p><div class="offer-list saved-offer-list">'+stale.map(o=>offerCard(o,true,true)).join("")+'</div>':"");
@@ -299,8 +311,11 @@
     else if(el.dataset.save){
       const id=el.dataset.save;
       if(state.saved.has(id))state.saved.delete(id);
-      else{const offer=state.offers.find(o=>offerId(o)===id);if(offer)state.saved.set(id,snapshot(offer))}
+      else{const offer=state.offers.find(o=>offerId(o)===id);if(offer)state.saved.set(id,snapshot(offer,getQty(id)))}
       writeSaved();
+      render();
+    }else if(el.dataset.qty){
+      setQty(el.dataset.qty,getQty(el.dataset.qty)+Number(el.dataset.dir));
       render();
     }
   });
