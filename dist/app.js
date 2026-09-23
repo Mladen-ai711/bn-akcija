@@ -154,10 +154,61 @@
     const warning=badRows.length?"Preskočeni neispravni redovi u tabeli: "+badRows.slice(0,10).join(", ")+(badRows.length>10?" i još "+(badRows.length-10):"")+".":"";
     return {stores:[...stores.values()],offers,warning};
   }
+  // Svaka prodavnica može imati svoju karticu (list) u Google Sheet-u; category/store tada dolaze iz config.js, ne iz kolona.
+  function offersFromStoreCSV(csv,category,store){
+    const rows=parseCSV(csv.trim().replace(/^﻿/,""));
+    if(rows.length<2)throw Error("list nema redove sa ponudama");
+    const headers=rows.shift().map(x=>x.trim().toLowerCase());
+    for(const required of ["period","product","unit","price","valid_until"]){
+      if(!headers.includes(required))throw Error("nedostaje kolona "+required);
+    }
+    const offers=[],badRows=[];
+    for(const [index,row] of rows.entries()){
+      if(row.every(v=>!v.trim()))continue;
+      const get=name=>row[headers.indexOf(name)]?.trim()||"";
+      const period=normalizePeriod(get("period"));
+      const product=get("product"),unit=get("unit");
+      const current=numberValue(get("price")),oldPrice=numberValue(get("old_price"));
+      if(!period||!product||!unit||!Number.isFinite(current)||current<=0){badRows.push(index+2);continue}
+      const count=offers.filter(o=>o.period===period).length;
+      if(count >= (period==="daily"?3:10))continue;
+      offers.push({category,store,period,product,unit,price:current,oldPrice:Number.isFinite(oldPrice)&&oldPrice>current?oldPrice:null,valid:get("valid_until"),image:get("image")||null,emoji:({market:"🛒",mesara:"🥩",apoteka:"🧴"})[category]});
+    }
+    if(!offers.length)throw Error("list nema valjanih ponuda");
+    return {offers,badRows};
+  }
+  async function loadFromSources(sources){
+    const stores=[],offers=[],problems=[];
+    const results=await Promise.all(sources.map(async src=>{
+      const category=normalizeCategory(src.category);
+      try{
+        if(!category)throw Error("nepoznata kategorija");
+        const response=await fetch(src.url,{cache:"no-store"});
+        if(!response.ok)throw Error("nije dostupan ("+response.status+")");
+        const {offers:list,badRows}=offersFromStoreCSV(await response.text(),category,src.store);
+        return {ok:true,category,store:src.store,offers:list,badRows};
+      }catch(error){return {ok:false,store:src.store,message:error.message}}
+    }));
+    for(const r of results){
+      if(!r.ok){problems.push(r.store+": "+r.message);continue}
+      stores.push({id:idOf(r.category,r.store),category:r.category,name:r.store});
+      offers.push(...r.offers);
+      if(r.badRows.length)problems.push(r.store+": preskočeni redovi "+r.badRows.slice(0,5).join(", ")+(r.badRows.length>5?" i još "+(r.badRows.length-5):""));
+    }
+    if(!offers.length)throw Error(problems.length?problems.join(" · "):"Nijedan list nije dao ponude.");
+    return {stores,offers,warning:problems.join(" · ")};
+  }
+  const sheetSources=Array.isArray(window.BN_CONFIG?.sheetSources)?window.BN_CONFIG.sheetSources.filter(s=>s?.url&&s?.category&&s?.store):[];
   const sheetUrl=window.BN_CONFIG?.sheetCsvUrl?.trim();
   let lastSnapshot="";
   async function loadData(){
-    if(!sheetUrl)Object.assign(state,demoData(),{demo:true});
+    if(sheetSources.length)try{
+      Object.assign(state,await loadFromSources(sheetSources),{demo:false,error:""});
+    }catch(error){
+      if(state.demo)Object.assign(state,demoData(),{error:"Google Sheet nije učitan: "+error.message});
+      else state.error="Osvježavanje nije uspjelo, prikazane su posljednje učitane ponude.";
+    }
+    else if(!sheetUrl)Object.assign(state,demoData(),{demo:true});
     else try{
       const response=await fetch(sheetUrl,{cache:"no-store"});
       if(!response.ok)throw Error("Tabela nije dostupna ("+response.status+").");
