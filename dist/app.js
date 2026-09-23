@@ -133,7 +133,8 @@
     const value=String(url||"").trim();
     if(!value)return "";
     const match=value.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?id=)([\w-]+)/);
-    return match?"https://lh3.googleusercontent.com/d/"+match[1]:value;
+    // "=w480" traži od Google-a manju, već umanjenu verziju slike, bez obzira koliko je original velik (npr. direktno sa telefona).
+    return match?"https://lh3.googleusercontent.com/d/"+match[1]+"=w480":value;
   }
   function dataFromCSV(csv){
     const rows=parseCSV(csv.trim().replace(/^\uFEFF/,""));
