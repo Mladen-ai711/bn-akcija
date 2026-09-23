@@ -1,0 +1,20 @@
+category,store,period,product,unit,price,old_price,valid_until
+market,Tropik,daily,"Mlijeko 2,8%",1 l,"1,65","2,20",23.09.
+market,Tropik,daily,Jaja,10 kom,"3,60","4,50",23.09.
+market,Tropik,daily,Jabuke,1 kg,"1,50","2,00",23.09.
+market,Tropik,weekly,Suncokretovo ulje,1 l,"2,45","3,10",22.09.-28.09.
+market,Tropik,weekly,Brašno,1 kg,"1,10","1,45",22.09.-28.09.
+market,Fortuna,daily,"Mlijeko 2,8%",1 l,"1,70","2,10",23.09.
+market,Fortuna,daily,Jaja,10 kom,"3,50","4,30",23.09.
+market,Fortuna,daily,Jabuke,1 kg,"1,60","",23.09.
+market,Fortuna,weekly,Kafa,200 g,"3,95","5,20",22.09.-28.09.
+market,Bost,daily,"Mlijeko 2,8%",1 l,"1,60","",23.09.
+market,Bost,daily,Jaja,10 kom,"3,40","4,00",23.09.
+market,Bost,daily,Jabuke,1 kg,"1,45","1,90",23.09.
+market,Bost,weekly,Šećer,1 kg,"1,45","1,90",22.09.-28.09.
+mesara,Mesara 1,daily,Pileći file,1 kg,"9,90","12,90",23.09.
+mesara,Mesara 1,daily,Juneće mljeveno meso,1 kg,"13,50","16,80",23.09.
+mesara,Mesara 1,weekly,Ćevapi,500 g,"6,90","8,40",22.09.-28.09.
+apoteka,Apoteka 1,daily,Krema za ruke,75 ml,"3,90","5,20",23.09.
+apoteka,Apoteka 1,daily,Šampon,250 ml,"5,40","6,90",23.09.
+apoteka,Apoteka 1,weekly,Pasta za zube,75 ml,"2,70","3,50",22.09.-28.09.
